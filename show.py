@@ -1,4 +1,4 @@
-from cropSearch import show_res
+from imageSearch import show_res
 
 res_dir = 'result'
 res_file = '1_2_res.json'
