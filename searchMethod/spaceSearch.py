@@ -4,12 +4,14 @@ import cv2
 import numpy as np
 from easydict import EasyDict as edict
 
+__all__ = ['spaceSearch']
 
-def mae(img1, img2):
+
+def _mae(img1, img2):
     return np.mean(np.abs(img1 - img2))
 
 
-def refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -> Dict[str, int]:
+def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -> Dict[str, int]:
     crop_w = init_box[2] - init_box[0]
     crop_h = init_box[3] - init_box[1]
 
@@ -29,7 +31,7 @@ def refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) ->
         'mae': 1,
     }
     res = edict(res)
-    res.mae = mae(imgL[res.y1: res.y2, res.x1: res.x2], imgS)
+    res.mae = _mae(imgL[res.y1: res.y2, res.x1: res.x2], imgS)
 
     for i in range(stride * 2):  # 行
         for j in range(stride * 2):  # 列
@@ -42,7 +44,7 @@ def refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) ->
             if box[2] > imgL.shape[1] or box[3] > imgL.shape[0]:
                 break
             crop = imgL[box[1]:  box[3], box[0]: box[2]]
-            this_mae = mae(crop, imgS)
+            this_mae = _mae(crop, imgS)
             if this_mae < res.mae:
                 res.x1, res.y1, res.x2, res.y2 = box
                 res.mae = this_mae
@@ -50,9 +52,9 @@ def refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) ->
     return res
 
 
-def search(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
-    imgL = transform_img(imgL)
-    imgS = transform_img(imgS)
+def spaceSearch(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
+    imgL = _transform_img(imgL)
+    imgS = _transform_img(imgS)
 
     imgS_h, imgS_w, _ = imgS.shape
     imgL_h, imgL_w, _ = imgL.shape
@@ -79,7 +81,7 @@ def search(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
             # print(f'i j: ({i}, {j}) target: ({imgL_w - imgS_w}, {imgL_h - imgS_h})')
             crop = imgL[j: j + imgS_h, i: i + imgS_w]
             # crop = img[1430: 1430 + imgS_h, 1258: 1258 + imgS_w]
-            this_mae = mae(crop, imgS)
+            this_mae = _mae(crop, imgS)
             # print(this_mae)
             if this_mae < minimum.mae:
                 minimum.x1 = i
@@ -97,13 +99,13 @@ def search(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
             minimum.x2,
             minimum.y2,
         ]
-        minimum = refined_search(imgL, imgS, min_box, t)
+        minimum = _refined_search(imgL, imgS, min_box, t)
 
     del minimum['mae']
     return dict(minimum)
 
 
-def transform_img(img: np.array):
+def _transform_img(img: np.array):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img.astype(float)
     img /= 255
