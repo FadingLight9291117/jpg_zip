@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 import json
 import argparse
+from typing import List
 
 import cv2
 from PIL import Image
@@ -20,33 +21,30 @@ def get_opt():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--img-path', type=str, default='data/imgs', help='原始图片文件夹路径。')
-    parser.add_argument('--tmp-path', type=str, default='tmp', help='存放临时图片的文件夹。')
+    parser.add_argument('--chart-path', type=str, default='charts', help='存放保存的图表')
+    # parser.add_argument('--result-path', type=str, default='result/')
 
     return parser.parse_args()
 
 
-opt = get_opt()
-
-tmp_path = opt.tmp_path
+tmp_number = Number()
+tmp_path = 'tmp'
 Path(tmp_path).mkdir(exist_ok=True)
 
-tmp_number = Number()
-imgs_path = opt.img_path
 
-
-def img_compose_cv2_(img, rate, show=False):
-    """
-        压缩会改变图片尺寸
-    """
-
-    h, w, _ = img.shape
-    h_new = int(h * rate)
-    w_new = int(w * rate)
-
-    img_new = cv2.resize(img, (w_new, h_new), interpolation=cv2.INTER_AREA)
-    img_new = cv2.resize(img_new, (w, h), interpolation=cv2.INTER_AREA)
-
-    return img_new
+# def img_compose_cv2_(img, rate, show=False):
+#     """
+#         压缩会改变图片尺寸
+#     """
+#
+#     h, w, _ = img.shape
+#     h_new = int(h * rate)
+#     w_new = int(w * rate)
+#
+#     img_new = cv2.resize(img, (w_new, h_new), interpolation=cv2.INTER_AREA)
+#     img_new = cv2.resize(img_new, (w, h), interpolation=cv2.INTER_AREA)
+#
+#     return img_new
 
 
 def img_compose_cv2(img, rate, show=False):
@@ -54,7 +52,7 @@ def img_compose_cv2(img, rate, show=False):
         opencv
     """
     save_quality = int(100 * rate)
-    save_path = Path('tmp') / f'{tmp_number()}_{rate}.jpg'
+    save_path = Path(tmp_path) / f'{tmp_number()}_{rate}.jpg'
     cv2.imwrite(str(save_path), img, [int(cv2.IMWRITE_JPEG_QUALITY), save_quality])
 
     img_res = cv2.imread(str(save_path))
@@ -67,20 +65,12 @@ def img_compose_cv2(img, rate, show=False):
 
 def crop_img(img, bbox, save=False):
     x1, y1, x2, y2 = bbox
-    crop = img[y1:y2, x1:x2, :]
-    crop_filename = f'{tmp_number()}_crop.jpg'
-    crop_save_path = f'{tmp_path}/{crop_filename}'
+    crop = img[y1:y2, x1:x2]
     if save:
+        crop_filename = f'{tmp_number()}_crop.jpg'
+        crop_save_path = f'{tmp_path}/{crop_filename}'
         cv2.imwrite(crop_save_path, crop)
     return crop
-
-
-def cover_img(img, crop, bbox, save=False):
-    img[bbox[1]:bbox[3], bbox[0]:bbox[2]] = crop
-    if save:
-        save_path = f'{tmp_path}/new_{tmp_number()}.jpg'
-        save_img(img, save_path)
-    return img
 
 
 def get_metrics(img, o_img):
@@ -88,21 +78,22 @@ def get_metrics(img, o_img):
     mae = np.mean(np.abs(img_sub))
 
     metrics = {
-        'mae': mae / 255
+        'mae': mae / 255,
     }
     return edict(metrics)
 
 
 def get_imgs(paths):
-    img_paths = Path(paths).glob('*')
+    img_paths = Path(paths).glob('*.jpg')
     imgs = []
     for img_path in img_paths:
         img = cv2.imread(str(img_path))
         imgs.append(img)
-    return imgs
+
+    return list(map(transform_img, imgs))
 
 
-def plot_img(df: pd.DataFrame):
+def plot_img(df: pd.DataFrame, save_path, show=False):
     # plt.title(r'不同尺寸不同压缩率下的正确图片MAE')
     plt.xlabel('compose rate')
     plt.ylabel('MAE')
@@ -111,114 +102,108 @@ def plot_img(df: pd.DataFrame):
         data = df.loc[crop]
         plt.plot(df.columns, data, label=crop)
     plt.legend()  # 图例展示位置，数字代表第几象限
-    plt.savefig(f'{time.time() :.2f}.jpg')
-    plt.show()
+    plt.savefig(f'{save_path}/{time.time() / 100:.2f}.jpg')
+    if show:
+        plt.show()
+    plt.clf()
 
 
-rates = [1., 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
-bboxes = [
-    (0, 0, 100, 100),
-    (0, 0, 120, 240),
-    (0, 0, 250, 280),
-    (0, 0, 300, 300),
-    (0, 0, 350, 350),
+rates = [i / 10 for i in range(1, 11)]
+anchors = [
+    [100, 100],
+    [200, 100],
+    [100, 200],
+    [150, 300],
+    [300, 150],
+    [300, 450],
 ]
 
 
-def error_test():
-    imgs = get_imgs(imgs_path)
-
-    dfs = []
-    for img in imgs:
-        crops = []
-        crops_composed = []
-        error_crops = []
-        for bbox in bboxes:
-            crop = crop_img(img, bbox)
-            crops.append(crop)
-
-            error_bbox = np.array(bbox) + random.randint(1, 100)
-            error_crop = crop_img(img, error_bbox)
-            error_crops.append(error_crop)
-
-            crop_news = []
-            for rate in rates:
-                crop_new = img_compose_cv2(crop, rate=rate)
-                crop_news.append(crop_new)
-            crops_composed.append(crop_news)
-
-        maes = np.zeros((len(bboxes), len(rates)))
-        for i, (crop, crop_composed_list) in enumerate(zip(error_crops, crops_composed)):
-            for j, crop_new in enumerate(crop_composed_list):
-                metric = get_metrics(crop, crop_new)
-                mae = metric.mae
-                maes[i, j] = mae
-        df = pd.DataFrame(maes, index=[trans_bbox(box) for box in bboxes], columns=rates)
-
-        dfs.append(df)
-    df_ = sum(dfs) / len(dfs)
-    plot_img(df_)
-
-
 def main():
-    imgs = get_imgs(imgs_path)
-    dfs = []
-    for img in imgs:
-        crops = []
-        crops_composed = []
-        for bbox in bboxes:
-            crop = crop_img(img, bbox)
-            crops.append(crop)
-            crop_news = []
-            for rate in rates:
-                crop_new = img_compose_cv2(crop, rate=rate)
-                crop_news.append(crop_new)
-            crops_composed.append(crop_news)
+    opts = get_opt()
+    imgs_path = opts.img_path
+    charts_path = opts.chart_path
+    imgLs = get_imgs(imgs_path)
 
-        maes = np.zeros((len(bboxes), len(rates)))
-        for i, (crop, crop_composed_list) in enumerate(zip(crops, crops_composed)):
-            for j, crop_new in enumerate(crop_composed_list):
-                metric = get_metrics(crop, crop_new)
-                mae = metric.mae
-                maes[i, j] = mae
-        df = pd.DataFrame(maes, index=[trans_bbox(box) for box in bboxes], columns=rates)
+    df: pd.DataFrame
+    df_data = np.zeros((len(imgLs), len(rates)))
+    for i, imgL in enumerate(imgLs):
+        for j, rate in enumerate(rates):
+            # 对于每个压缩率产生n张不同的位置的大小的crop
+            boxes = rand_crops(imgL)
+            imgSs = [crop_img(imgL, box) for box in boxes]
 
-        dfs.append(df)
-    df_ = sum(dfs) / len(dfs)
-    plot_img(df_)
+            crops_composed = [img_compose_cv2(imgS, rate) for imgS in imgSs]
+            maes_ = [get_metrics(img, o_img).mae for img, o_img in zip(crops_composed, imgSs)]
+            mae = np.mean(maes_)
+            df_data[i, j] = mae
 
-    # print('======================not origin img=======================')
-    #
-    # crops = []
-    # for bbox in bboxes:
-    #     crop = crop_img(img_paths[0], bbox)
-    #     for rate in rates:
-    #         crop_new = img_compose_cv2(crop, rate=rate)
-    #         crops.append(crop_new)
-    # crops_np = np.array([np.array(img) for img in crops])
-    #
-    # for img_path in img_paths[1:]:
-    #     metrics = []
-    #     for bbox in bboxes:
-    #         other_crop = crop_img(img_path, bbox)
-    #
-    #         maes = get_metrics(crops_np, other_crop).tolist()
-    #         metrics.append(maes)
-    #
-    #     df = pd.DataFrame(metrics, index=list(map(trans_bbox, bboxes)), columns=rates)
-    #     print(df)
+    df_idx = [f'image {i}' for i in range(len(imgLs))]
+    df = pd.DataFrame(df_data, index=df_idx, columns=rates)
+
+    plot_img(df, charts_path, show=True)
 
 
-def trans_bbox(bbox):
-    return f'{bbox[2]}X{bbox[3]}'
+def error_main():
+    opts = get_opt()
+    imgs_path = opts.img_path
+    charts_path = opts.chart_path
+    imgLs = get_imgs(imgs_path)
+
+    df: pd.DataFrame
+    df_data = np.zeros((len(imgLs), len(rates)))
+    for i, imgL in enumerate(imgLs):
+        for j, rate in enumerate(rates):
+            # 对于每个压缩率产生n张不同的位置的大小的crop
+            boxes = rand_crops(imgL)
+            imgSs = [crop_img(imgL, box) for box in boxes]
+
+            error_boxes = rand_crops(imgL)
+            error_imgSs = [crop_img(imgL, box) for box in error_boxes]
+
+            crops_composed = [img_compose_cv2(imgS, rate) for imgS in imgSs]
+            maes_ = [get_metrics(img, o_img).mae for img, o_img in zip(crops_composed, error_imgSs)]
+            mae = np.mean(maes_)
+            df_data[i, j] = mae
+
+    df_idx = [f'image {i}' for i in range(len(imgLs))]
+    df = pd.DataFrame(df_data, index=df_idx, columns=rates)
+
+    plot_img(df, charts_path, show=True)
 
 
-def save_img(img, save_path):
-    img = Image.fromarray(img)
-    img.save(save_path)
+def rand_crops(img: np.ndarray):
+    """
+    随机中心点，不同尺寸的吧
+    """
+    img_h, img_w, _ = img.shape
+    boxes = []
+    for anchor in anchors:
+        while True:
+            w, h = anchor
+            x, y = np.random.rand(2, )
+            x = int(x * img_w)
+            y = int(y * img_h)
+            x1, x2 = x - w // 2, x + w // 2
+            y1, y2 = y - h // 2, y + h // 2
+            if x1 >= 0 and x2 <= img_w and y1 >= 0 and y2 <= img_h:
+                break
+        boxes.append((x1, y1, x2, y2))
+
+    return boxes
+
+
+def get_bbox_name(bbox):
+    return f'{bbox[2] - bbox[0]}X{bbox[3] - bbox[1]}'
+
+
+def transform_img(img: np.array):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = img.astype(float)
+    # img /= 255
+    return img
 
 
 if __name__ == '__main__':
-    # test_cv2()
     main()
-    error_test()
+    error_main()
