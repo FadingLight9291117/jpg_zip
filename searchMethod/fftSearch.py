@@ -59,14 +59,10 @@ def fftSearch(imgL, imgS, rate=5):
     p2 = (max_idx[1] + imgS.shape[1], max_idx[0] + imgS.shape[0])
 
     box = [*p1, *p2]
-    box = [int(i * rate) for i in box]
-    res = {
-        'x1': box[0],
-        'y1': box[1],
-        'x2': box[2],
-        'y2': box[3],
-    }
-    return res
+    box = [int(i * rate) for i in box]  # 这里box坐标放大后会跟imgS的size对不上，有几个pixel的差异
+    box[2] = box[0] + s_w
+    box[3] = box[1] + s_h
+    return box
 
 
 if __name__ == '__main__':

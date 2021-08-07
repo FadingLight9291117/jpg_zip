@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import cv2
 import numpy as np
@@ -12,6 +12,9 @@ def _mae(img1, img2):
 
 
 def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -> Dict[str, int]:
+    assert imgS.shape[0] == init_box[3] - init_box[1]
+    assert imgS.shape[1] == init_box[2] - init_box[0]
+
     crop_w = init_box[2] - init_box[0]
     crop_h = init_box[3] - init_box[1]
 
@@ -24,10 +27,10 @@ def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -
     init_crop = edict(init_crop)
 
     res = {
-        'x1': init_box[0],
-        'y1': init_box[1],
-        'x2': init_box[2],
-        'y2': init_box[3],
+        'x1': init_crop.x1,
+        'y1': init_crop.y1,
+        'x2': init_crop.x2,
+        'y2': init_crop.y2,
         'mae': 1,
     }
     res = edict(res)
@@ -52,7 +55,7 @@ def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -
     return res
 
 
-def spaceSearch(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
+def spaceSearch(imgL: np.ndarray, imgS: np.ndarray, stride=40, refined=True) -> List[int]:
     imgL = _transform_img(imgL)
     imgS = _transform_img(imgS)
 
@@ -71,7 +74,7 @@ def spaceSearch(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
     # n = 0
     # crop = img[:imgS_h, :imgS_w]
     # t = imgL_h * imgL_w / (imgS_w * imgS_h)
-    t = 40
+    t = stride
     for j in range(0, imgL_h - imgS_h + 1, t):
 
         # cv2.imwrite(f'tmp/{n}.jpg', crop)
@@ -101,8 +104,7 @@ def spaceSearch(imgL: np.ndarray, imgS: np.ndarray, refined=True) -> dict:
         ]
         minimum = _refined_search(imgL, imgS, min_box, t)
 
-    del minimum['mae']
-    return dict(minimum)
+    return [minimum.x1, minimum.y1, minimum.x2, minimum.y2]
 
 
 def _transform_img(img: np.array):

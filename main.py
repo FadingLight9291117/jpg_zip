@@ -32,21 +32,6 @@ tmp_path = 'tmp'
 Path(tmp_path).mkdir(exist_ok=True)
 
 
-# def img_compose_cv2_(img, rate, show=False):
-#     """
-#         压缩会改变图片尺寸
-#     """
-#
-#     h, w, _ = img.shape
-#     h_new = int(h * rate)
-#     w_new = int(w * rate)
-#
-#     img_new = cv2.resize(img, (w_new, h_new), interpolation=cv2.INTER_AREA)
-#     img_new = cv2.resize(img_new, (w, h), interpolation=cv2.INTER_AREA)
-#
-#     return img_new
-
-
 def img_compose_cv2(img, rate, show=False):
     """
         opencv
