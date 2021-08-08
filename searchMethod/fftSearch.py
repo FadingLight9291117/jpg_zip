@@ -28,7 +28,7 @@ def _save_img(im, save_path):
     cv2.imwrite(save_path, im)
 
 
-def fftSearch(imgL, imgS, rate=5):
+def fftSearch(imgL, imgS, rate=1):
     imgL = _trans_img(imgL)
     imgS = _trans_img(imgS)
 

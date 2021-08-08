@@ -27,33 +27,32 @@ class Number:
 
 class Timer:
     def __init__(self):
-        self._num = 0
-        self._total_time = 0
+        self._total_time = []
 
     def __enter__(self):
         self._begin_time = time.time()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._end_time = time.time()
-        self._total_time += self._end_time - self._begin_time
-
-        self._num += 1
+        self._total_time.append(self._end_time - self._begin_time)
 
     def run_num(self):
-        return self._num
+        return len(self._total_time)
 
     def this_time(self):
         return self._end_time - self._begin_time
 
     def average_time(self):
-        return self._total_time / self._num
+        return sum(self._total_time) / len(self._total_time)
 
     def total_time(self):
+        return sum(self._total_time)
+
+    def all_time(self):
         return self._total_time
 
     def clear(self):
-        self._num = 0
-        self._total_time = 0
+        self._total_time = []
 
     @classmethod
     def timer(cls, func):

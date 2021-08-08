@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 import argparse
 from typing import List, Dict
+import functools
 
 import cv2
 import numpy as np
@@ -25,16 +26,16 @@ class SearchMethodNotFoundException(Exception):
         return f'{self.name} not found.'
 
 
-def main_search(imgL_file, imgS_file, search_method):
+def main_search(imgL_file, imgS_file, search_method, rate=1):
     imgL = cv2.imread(str(imgL_file))
     imgS = cv2.imread(str(imgS_file))
 
     if search_method == 'space':
         search_method = spaceSearch.spaceSearch
     elif search_method == 'fft':
-        search_method = fftSearch.fftSearch
+        search_method = functools.partial(fftSearch.fftSearch, rate=rate)
     elif search_method == 'fftp':
-        search_method = fftpSearch.fftpSearch
+        search_method = functools.partial(fftpSearch.fftpSearch, rate=rate)
     else:
         raise SearchMethodNotFoundException(search_method)
 
@@ -74,7 +75,8 @@ if __name__ == '__main__':
     parser.add_argument('--imgS-dir', type=str, default='./data/celefaces/imgS', help='小图的文件夹路径')
     parser.add_argument('--result-path', type=str, default='./result', help='存放结果的文件夹')
     parser.add_argument('--label-path', type=str, default='./data/celefaces/label.json')
-    parser.add_argument('--search-method', type=str, default='fftp', help='搜索方法')
+    parser.add_argument('--search-method', type=str, default='fft', help='搜索方法')
+    parser.add_argument('--rate', type=int, default=5, help='搜索方法的参数')
     parser.add_argument('--show', action='store_true', default=False, help='是否显示结果图片')
     parser.add_argument('--enable-log', action='store_true', default=False, help='是否显示log')
 
@@ -84,12 +86,13 @@ if __name__ == '__main__':
     imgS_dir = opt.imgS_dir
     label_path = opt.label_path
     search_method = opt.search_method
+    rate = opt.rate
 
     dataset = Dataset(imgL_dir, imgS_dir, label_path)
 
     timer = Timer()
 
-    N = len(dataset)
+    N = 500
     datas = tqdm(dataset.randN(N), total=N)
     dists = []
 
@@ -99,7 +102,7 @@ if __name__ == '__main__':
         save_path = f'{opt.result_path}/{Path(imgS_path).stem}_res.json'
 
         with timer:
-            res = main_search(imgL_path, imgS_path, search_method)
+            res = main_search(imgL_path, imgS_path, search_method, rate)
         res = edict(res)
         save_res(res, save_path)
         dist = metric(res.box, data.box)
@@ -111,4 +114,4 @@ if __name__ == '__main__':
             show_res(data.imgL, res_box=res.box, gt_box=data.box)
 
     print(f'average dist: {np.mean(dists)}.')
-    print(f'average time: {timer.average_time() * 100:.0f}ms.')
+    print(f'average time: {timer.average_time() * 100:.2f}ms.')

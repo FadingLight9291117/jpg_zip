@@ -6,6 +6,8 @@ import numpy as np
 from scipy.fftpack import fft2, ifft2
 import matplotlib.pyplot as plt
 from easydict import EasyDict as edict
+from PIL import Image, ImageDraw
+import matplotlib.pyplot as plt
 
 from utils import Timer
 
@@ -62,14 +64,17 @@ def fftpSearch(imgL, imgS, rate=5):
     pc_matrix = ifft2(fcn).real
     max_idx = np.unravel_index(np.argmax(pc_matrix), pc_matrix.shape)
 
-    p1 = (max_idx[1], max_idx[0])
-    p2 = (max_idx[1] + imgS_rs.shape[1], max_idx[0] + imgS_rs.shape[0])
+    p1 = np.array([max_idx[1], max_idx[0]]) * rate
 
-    box = [*p1, *p2]
-    box = [int(i * rate) for i in box]  # 这里box坐标放大后会跟imgS的size对不上，有几个pixel的差异
-    box[2] = box[0] + s_w
-    box[3] = box[1] + s_h
-    res = _refined_search(imgL, imgS, box, stride=rate)
+    box = np.zeros(4)
+    box[:2] = p1
+    box[2] = p1[0] + s_w
+    box[3] = p1[1] + s_h
+    box = list(map(int, box))
+    try:
+        res = _refined_search(imgL, imgS, box, stride=rate)
+    except Exception as e:
+        ...
 
     return [res.x1, res.y1, res.x2, res.y2]
 
@@ -78,29 +83,25 @@ def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -
     assert imgS.shape[0] == init_box[3] - init_box[1]
     assert imgS.shape[1] == init_box[2] - init_box[0]
 
-    crop_w = init_box[2] - init_box[0]
-    crop_h = init_box[3] - init_box[1]
+    imgS_h, imgS_w = imgS.shape[0], imgS.shape[1]
 
     init_crop = {
         'x1': init_box[0] - stride if init_box[0] - stride > 0 else 0,
         'y1': init_box[1] - stride if init_box[1] - stride > 0 else 0,
     }
-    init_crop['x2'] = init_crop['x1'] + crop_w
-    init_crop['y2'] = init_crop['y1'] + crop_h
+    init_crop['x2'] = init_crop['x1'] + imgS_w
+    init_crop['y2'] = init_crop['y1'] + imgS_h
     init_crop = edict(init_crop)
 
     res = {
         'x1': init_crop.x1,
         'y1': init_crop.y1,
         'x2': init_crop.x2,
-        'y2': init_crop.y1,
+        'y2': init_crop.y2,
         'mae': 1,
     }
     res = edict(res)
-    try:
-        res.mae = _mae(imgL[res.y1: res.y2, res.x1: res.x2], imgS)
-    except Exception as e:
-        ...
+    res.mae = _mae(imgL[res.y1: res.y2, res.x1: res.x2], imgS)
 
     for i in range(stride * 2):  # 行
         for j in range(stride * 2):  # 列
