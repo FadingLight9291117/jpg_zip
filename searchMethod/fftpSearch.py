@@ -14,6 +14,14 @@ from utils import Timer
 __all__ = ['fftpSearch']
 
 
+def _show_img(imgL, res):
+    box = [res.x1, res.y1, res.x2, res.y2]
+    im = Image.fromarray(imgL)
+    imd = ImageDraw.ImageDraw(im)
+    imd.rectangle(box)
+    im.show()
+
+
 def _mae(img1, img2):
     return np.mean(np.abs(img1 - img2))
 
@@ -71,10 +79,7 @@ def fftpSearch(imgL, imgS, rate=5):
     box[2] = p1[0] + s_w
     box[3] = p1[1] + s_h
     box = list(map(int, box))
-    try:
-        res = _refined_search(imgL, imgS, box, stride=rate)
-    except Exception as e:
-        ...
+    res = _refined_search(imgL, imgS, box, stride=rate)
 
     return [res.x1, res.y1, res.x2, res.y2]
 
@@ -101,7 +106,8 @@ def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -
         'mae': 1,
     }
     res = edict(res)
-    res.mae = _mae(imgL[res.y1: res.y2, res.x1: res.x2], imgS)
+    crop = imgL[res.y1: res.y2, res.x1: res.x2]
+    res.mae = _mae(crop, imgS)
 
     for i in range(stride * 2):  # 行
         for j in range(stride * 2):  # 列
@@ -118,7 +124,6 @@ def _refined_search(imgL: np.ndarray, imgS: np.ndarray, init_box, stride: int) -
             if this_mae < res.mae:
                 res.x1, res.y1, res.x2, res.y2 = box
                 res.mae = this_mae
-                # print(res)
     return res
 
 

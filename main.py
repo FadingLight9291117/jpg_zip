@@ -15,12 +15,13 @@ from easydict import EasyDict as edict
 import matplotlib.pyplot as plt
 
 from utils import pretty_print, number_formatter, Number
+from data.dataset import Dataset
 
 
 def get_opt():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--img-path', type=str, default='data/imgs', help='原始图片文件夹路径。')
+    parser.add_argument('--data-dir', type=str, default='data/face', help='原始图片文件夹路径。')
     parser.add_argument('--chart-path', type=str, default='charts', help='存放保存的图表')
     # parser.add_argument('--result-path', type=str, default='result/')
 
@@ -32,13 +33,12 @@ tmp_path = 'tmp'
 Path(tmp_path).mkdir(exist_ok=True)
 
 
-def img_compose_cv2(img, rate, show=False):
+def img_compose_cv2(img, quality, show=False):
     """
         opencv
     """
-    save_quality = int(100 * rate)
-    save_path = Path(tmp_path) / f'{tmp_number()}_{rate}.jpg'
-    cv2.imwrite(str(save_path), img, [int(cv2.IMWRITE_JPEG_QUALITY), save_quality])
+    save_path = Path(tmp_path) / f'{tmp_number()}_{quality}.jpg'
+    cv2.imwrite(str(save_path), img, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
 
     img_res = cv2.imread(str(save_path))
 
@@ -46,6 +46,12 @@ def img_compose_cv2(img, rate, show=False):
         img.imshow(save_path.name, img_res)
 
     return img_res
+
+
+def trans_img(img):
+    img = img.astype(np.float32)
+    img = img / 255
+    return img
 
 
 def crop_img(img, bbox, save=False):
@@ -59,11 +65,13 @@ def crop_img(img, bbox, save=False):
 
 
 def get_metrics(img, o_img):
+    img = trans_img(img)
+    o_img = trans_img(o_img)
     img_sub = img - o_img
     mae = np.mean(np.abs(img_sub))
 
     metrics = {
-        'mae': mae / 255,
+        'mae': mae,
     }
     return edict(metrics)
 
@@ -93,7 +101,8 @@ def plot_img(df: pd.DataFrame, save_path, show=False):
     plt.clf()
 
 
-rates = [i / 10 for i in range(1, 11)]
+qualitys = [i * 10 for i in range(1, 11)]
+
 anchors = [
     [100, 100],
     [200, 100],
@@ -105,77 +114,73 @@ anchors = [
 
 
 def main():
-    opts = get_opt()
-    imgs_path = opts.img_path
-    charts_path = opts.chart_path
-    imgLs = get_imgs(imgs_path)
+    opt = get_opt()
+    data_dir = Path(opt.data_dir)
+    label_path = data_dir / 'label.json'
+    imgL_path = data_dir / 'imgL'
+    imgS_path = data_dir / 'imgS'
 
-    df: pd.DataFrame
-    df_data = np.zeros((len(imgLs), len(rates)))
-    for i, imgL in enumerate(imgLs):
-        for j, rate in enumerate(rates):
-            # 对于每个压缩率产生n张不同的位置的大小的crop
-            boxes = rand_crops(imgL)
-            imgSs = [crop_img(imgL, box) for box in boxes]
+    dataset = Dataset(imgL_path, imgS_path, label_path)
 
-            crops_composed = [img_compose_cv2(imgS, rate) for imgS in imgSs]
-            maes_ = [get_metrics(img, o_img).mae for img, o_img in zip(crops_composed, imgSs)]
-            mae = np.mean(maes_)
-            df_data[i, j] = mae
+    labels = json.load(label_path.open())
 
-    df_idx = [f'image {i}' for i in range(len(imgLs))]
-    df = pd.DataFrame(df_data, index=df_idx, columns=rates)
+    maes = []
+    epochs = 100
+    for quality in qualitys:
+        maes_ = []
+        for i in range(epochs):
+            rand_idx = np.random.randint(len(labels))
+            data = dataset[rand_idx]
+            imgS = data.imgS
+            imgS_compressed = img_compose_cv2(imgS, quality)
 
-    plot_img(df, charts_path, show=True)
+            mae = get_metrics(imgS, imgS_compressed).mae
+            maes_.append(mae)
+        maes.append(maes_)
+
+    return maes
 
 
 def error_main():
-    opts = get_opt()
-    imgs_path = opts.img_path
-    charts_path = opts.chart_path
-    imgLs = get_imgs(imgs_path)
+    opt = get_opt()
+    data_dir = Path(opt.data_dir)
+    label_path = data_dir / 'label.json'
+    imgL_path = data_dir / 'imgL'
+    imgS_path = data_dir / 'imgS'
 
-    df: pd.DataFrame
-    df_data = np.zeros((len(imgLs), len(rates)))
-    for i, imgL in enumerate(imgLs):
-        for j, rate in enumerate(rates):
-            # 对于每个压缩率产生n张不同的位置的大小的crop
-            boxes = rand_crops(imgL)
-            imgSs = [crop_img(imgL, box) for box in boxes]
+    dataset = Dataset(imgL_path, imgS_path, label_path)
 
-            error_boxes = rand_crops(imgL)
-            error_imgSs = [crop_img(imgL, box) for box in error_boxes]
+    labels = json.load(label_path.open())
 
-            crops_composed = [img_compose_cv2(imgS, rate) for imgS in imgSs]
-            maes_ = [get_metrics(img, o_img).mae for img, o_img in zip(crops_composed, error_imgSs)]
-            mae = np.mean(maes_)
-            df_data[i, j] = mae
+    maes = []
+    epochs = 100
+    for quality in qualitys:
+        maes_ = []
+        for i in range(epochs):
+            rand_idx = np.random.randint(len(labels))
+            data = dataset[rand_idx]
+            imgS = data.imgS
+            crop = rand_crop(data.imgL, imgS.shape[:2])
+            imgS_compressed = img_compose_cv2(imgS, quality)
 
-    df_idx = [f'image {i}' for i in range(len(imgLs))]
-    df = pd.DataFrame(df_data, index=df_idx, columns=rates)
+            mae = get_metrics(crop, imgS_compressed).mae
+            maes_.append(mae)
+        maes.append(maes_)
+    ...
 
-    plot_img(df, charts_path, show=True)
 
-
-def rand_crops(img: np.ndarray):
+def rand_crop(img: np.ndarray, shape):
     """
     随机中心点，不同尺寸的吧
     """
     img_h, img_w, _ = img.shape
-    boxes = []
-    for anchor in anchors:
-        while True:
-            w, h = anchor
-            x, y = np.random.rand(2, )
-            x = int(x * img_w)
-            y = int(y * img_h)
-            x1, x2 = x - w // 2, x + w // 2
-            y1, y2 = y - h // 2, y + h // 2
-            if x1 >= 0 and x2 <= img_w and y1 >= 0 and y2 <= img_h:
-                break
-        boxes.append((x1, y1, x2, y2))
+    c_h, c_w = shape
 
-    return boxes
+    point1 = (np.random.randint(img_w - c_w),
+              np.random.randint(img_h - c_h))
+    point2 = (point1[0] + c_w, point1[1] + c_h)
+    box = [*point1, *point2]
+    return img[box[3] - box[1], box[2] - box[0]]
 
 
 def get_bbox_name(bbox):
@@ -190,5 +195,5 @@ def transform_img(img: np.array):
 
 
 if __name__ == '__main__':
-    main()
+    # main()
     error_main()

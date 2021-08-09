@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 from easydict import EasyDict as edict
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from utils import Timer
 from searchMethod import fftSearch, spaceSearch, fftpSearch
@@ -31,7 +32,7 @@ def main_search(imgL_file, imgS_file, search_method, rate=1):
     imgS = cv2.imread(str(imgS_file))
 
     if search_method == 'space':
-        search_method = spaceSearch.spaceSearch
+        search_method = functools.partial(spaceSearch.spaceSearch, stride=rate)
     elif search_method == 'fft':
         search_method = functools.partial(fftSearch.fftSearch, rate=rate)
     elif search_method == 'fftp':
@@ -55,7 +56,14 @@ def save_res(res, save_path):
         # print(f'result save in "{save_path}"')
 
 
-def show_res(imgL, res_box, gt_box, save=False):
+def save_img(img_path, imgL, res_box, gt_box):
+    im = cv2.cvtColor(imgL, cv2.COLOR_RGB2BGR)
+    im = cv2.rectangle(im, res_box[:2], res_box[2:], color=(0, 0, 255), thickness=2)
+    im = cv2.rectangle(im, gt_box[:2], gt_box[2:], color=(0, 255, 0), thickness=2)
+    cv2.imwrite(img_path, im)
+
+
+def show_res(imgL, res_box, gt_box):
     im = cv2.cvtColor(imgL, cv2.COLOR_RGB2BGR)
     im = cv2.rectangle(im, res_box[:2], res_box[2:], color=(0, 0, 255), thickness=2)
     im = cv2.rectangle(im, gt_box[:2], gt_box[2:], color=(0, 255, 0), thickness=2)
@@ -71,20 +79,22 @@ def metric(res_box, gt_box):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--imgL-dir', type=str, default='./data/celefaces/imgL', help='大图的文件夹路径')
-    parser.add_argument('--imgS-dir', type=str, default='./data/celefaces/imgS', help='小图的文件夹路径')
+    parser.add_argument('--dataset-dir', type=str, default='./data/face',
+                        help='数据的路径，必须有imgL文件夹，imgS文件夹，和label.json标签文件')
     parser.add_argument('--result-path', type=str, default='./result', help='存放结果的文件夹')
-    parser.add_argument('--label-path', type=str, default='./data/celefaces/label.json')
-    parser.add_argument('--search-method', type=str, default='fft', help='搜索方法')
-    parser.add_argument('--rate', type=int, default=5, help='搜索方法的参数')
+    parser.add_argument('--search-method', type=str, default='space', help='搜索方法')
+    parser.add_argument('--rate', type=int, default=10, help='搜索方法的参数')
+    parser.add_argument('--save', action='store_true', default=True, help='保存结果图片')
     parser.add_argument('--show', action='store_true', default=False, help='是否显示结果图片')
     parser.add_argument('--enable-log', action='store_true', default=False, help='是否显示log')
 
     opt = parser.parse_args()
 
-    imgL_dir = opt.imgL_dir
-    imgS_dir = opt.imgS_dir
-    label_path = opt.label_path
+    dataset_dir = opt.dataset_dir
+    dataset_name = Path(dataset_dir).name
+    imgL_dir = str(Path(dataset_dir) / 'imgL')
+    imgS_dir = str(Path(dataset_dir) / 'imgS')
+    label_path = str(Path(dataset_dir) / 'label.json')
     search_method = opt.search_method
     rate = opt.rate
 
@@ -92,8 +102,9 @@ if __name__ == '__main__':
 
     timer = Timer()
 
-    N = 500
-    datas = tqdm(dataset.randN(N), total=N)
+    N = 10
+    datas = dataset[:N]
+    datas = tqdm(datas, total=N)
     dists = []
 
     for data in datas:
@@ -104,7 +115,7 @@ if __name__ == '__main__':
         with timer:
             res = main_search(imgL_path, imgS_path, search_method, rate)
         res = edict(res)
-        save_res(res, save_path)
+        # save_res(res, save_path)
         dist = metric(res.box, data.box)
         dists.append(dist)
         if opt.enable_log:
@@ -112,6 +123,10 @@ if __name__ == '__main__':
             print(f'dist: {dist:.2f}')
         if opt.show:
             show_res(data.imgL, res_box=res.box, gt_box=data.box)
+        if opt.save:
+            save_img_path = Path('result') / dataset_name / search_method /data.imgS_name
+            save_img_path.parent.mkdir(exist_ok=True, parents=True)
+            save_img(str(save_img_path), data.imgL, res_box=res.box, gt_box=data.box)
 
     print(f'average dist: {np.mean(dists)}.')
     print(f'average time: {timer.average_time() * 100:.2f}ms.')

@@ -37,8 +37,7 @@ class Dataset:
         for i in range(num):
             yield self.randOne()
 
-    def __getitem__(self, i):
-        label = self.labels[i]
+    def label2Data(self, label):
         imgL_name = label['imgL']
         imgS_name = label['imgS']
         imgL_path = Path(self.imgL_path) / imgL_name
@@ -50,6 +49,13 @@ class Dataset:
         box = label['box']
         box = np.array(box)
         return self._Data(imgL_name, imgS_name, imgL, imgS, box)
+
+    def __getitem__(self, i):
+        label = self.labels[i]
+        if type(label) is list:
+            return [self.label2Data(l) for l in label]
+        else:
+            return self.label2Data(label)
 
     def __len__(self):
         return len(self.labels)

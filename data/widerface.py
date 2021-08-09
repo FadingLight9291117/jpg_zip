@@ -10,16 +10,15 @@ def get_crop(img, box):
     return img[box[1]: box[3], box[0]: box[2]]
 
 
-faceset_path = Path('celefaces')
-images_path = faceset_path / 'images'
+faceset_path = Path('face')
 imgL_path = faceset_path / 'imgL'
 imgS_path = faceset_path / 'imgS'
 imgS_compressed_path = faceset_path / 'imgS_compressed'
 
-faceset = list(images_path.glob('*.jpg'))
+faceset = list(imgL_path.glob('*.jpg'))
 faceset = {path.name: path for path in faceset}
 
-label_path = list(images_path.glob('*.json'))[0]
+label_path = list(imgL_path.glob('*.json'))[0]
 with label_path.open() as f:
     labels = json.load(f)
 
@@ -42,6 +41,7 @@ for label in labels:
             'imgS': imgS_name,
             'box': box,
         }
+
         infos.append(info)
 
 # 保存标签

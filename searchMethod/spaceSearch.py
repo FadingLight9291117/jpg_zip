@@ -103,7 +103,6 @@ def spaceSearch(imgL: np.ndarray, imgS: np.ndarray, stride=40, refined=True) -> 
             minimum.y2,
         ]
         minimum = _refined_search(imgL, imgS, min_box, t)
-
     return [minimum.x1, minimum.y1, minimum.x2, minimum.y2]
 
 
