@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from easydict import EasyDict as edict
 import matplotlib.pyplot as plt
+import mpl_finance
 
 from utils import pretty_print, number_formatter, Number
 from data.dataset import Dataset
@@ -86,19 +87,12 @@ def get_imgs(paths):
     return list(map(transform_img, imgs))
 
 
-def plot_img(df: pd.DataFrame, save_path, show=False):
-    # plt.title(r'不同尺寸不同压缩率下的正确图片MAE')
-    plt.xlabel('compose rate')
-    plt.ylabel('MAE')
-    plt.ylim(0, 1)
-    for crop in df.index:
-        data = df.loc[crop]
-        plt.plot(df.columns, data, label=crop)
-    plt.legend()  # 图例展示位置，数字代表第几象限
-    plt.savefig(f'{save_path}/{time.time() / 100:.2f}.jpg')
-    if show:
-        plt.show()
-    plt.clf()
+def plot_img(, save_path, show=False):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    mpl_finance.candlestick_ochl(
+        ax=ax,
+
+    )
 
 
 qualitys = [i * 10 for i in range(1, 11)]

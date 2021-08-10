@@ -14,7 +14,7 @@ from easydict import EasyDict as edict
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from utils import Timer
+from utils import Timer, pretty_print
 from searchMethod import fftSearch, spaceSearch, fftpSearch
 from data.dataset import Dataset
 
@@ -76,14 +76,23 @@ def metric(res_box, gt_box):
     return dist
 
 
+def get_metric(timer, dists, t):
+    metrics = {
+        'acc': np.mean(dists < t),
+        'average dist': f'{np.mean(dists):.2f}',
+        'average time': f'{timer.average_time() * 100: .2f}'
+    }
+    return metrics
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--dataset-dir', type=str, default='./data/face',
                         help='数据的路径，必须有imgL文件夹，imgS文件夹，和label.json标签文件')
     parser.add_argument('--result-path', type=str, default='./result', help='存放结果的文件夹')
-    parser.add_argument('--search-method', type=str, default='space', help='搜索方法')
-    parser.add_argument('--rate', type=int, default=10, help='搜索方法的参数')
+    parser.add_argument('--search-method', type=str, default='fft', help='搜索方法')
+    parser.add_argument('--rate', type=int, default=2, help='搜索方法的参数')
     parser.add_argument('--save', action='store_true', default=True, help='保存结果图片')
     parser.add_argument('--show', action='store_true', default=False, help='是否显示结果图片')
     parser.add_argument('--enable-log', action='store_true', default=False, help='是否显示log')
@@ -102,7 +111,7 @@ if __name__ == '__main__':
 
     timer = Timer()
 
-    N = 10
+    N = 100
     datas = dataset[:N]
     datas = tqdm(datas, total=N)
     dists = []
@@ -124,9 +133,12 @@ if __name__ == '__main__':
         if opt.show:
             show_res(data.imgL, res_box=res.box, gt_box=data.box)
         if opt.save:
-            save_img_path = Path('result') / dataset_name / search_method /data.imgS_name
+            save_img_path = Path('result') / dataset_name / search_method / data.imgS_name
             save_img_path.parent.mkdir(exist_ok=True, parents=True)
             save_img(str(save_img_path), data.imgL, res_box=res.box, gt_box=data.box)
 
-    print(f'average dist: {np.mean(dists)}.')
-    print(f'average time: {timer.average_time() * 100:.2f}ms.')
+    dists = np.array(dists)
+    t = opt.rate
+
+    metrics = get_metric(timer, dists, t)
+    pretty_print(metrics)

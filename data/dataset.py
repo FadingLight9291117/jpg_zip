@@ -7,6 +7,8 @@ from easydict import EasyDict as edict
 from typing import List
 import cv2
 
+__all__ = ['Dataset']
+
 
 class Dataset:
     @dataclass
