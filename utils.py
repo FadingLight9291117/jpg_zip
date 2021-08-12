@@ -2,6 +2,8 @@ import functools
 import json
 import time
 
+import numpy as np
+
 
 def number_formatter(number, n=2):
     return f'{number:.4f}'
@@ -65,3 +67,7 @@ class Timer:
             return res
 
         return wrapper
+
+
+def mae(img1, img2):
+    return np.mean(np.abs(img1 - img2))

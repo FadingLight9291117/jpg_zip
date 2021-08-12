@@ -25,6 +25,12 @@ class Dataset:
         with open(label_path, encoding='utf-8') as f:
             self.labels = json.load(f)
 
+    def from_dir(self, data_dir):
+        data_dir = Path(data_dir)
+        imgL_dir = data_dir / 'imgL'
+        imgS_dir = data_dir / 'imgS'
+        label_path = data_dir / 'label_path'
+
     def _trans_img(self, img: np.ndarray):
         # img = img.astype(np.float)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

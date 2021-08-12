@@ -97,17 +97,9 @@ def plot_img(, save_path, show=False):
 
 qualitys = [i * 10 for i in range(1, 11)]
 
-anchors = [
-    [100, 100],
-    [200, 100],
-    [100, 200],
-    [150, 300],
-    [300, 150],
-    [300, 450],
-]
-
 
 def main():
+    qualitys = [i * 10 for i in range(1, 11)]
     opt = get_opt()
     data_dir = Path(opt.data_dir)
     label_path = data_dir / 'label.json'

@@ -13,10 +13,17 @@ import numpy as np
 from easydict import EasyDict as edict
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from PIL import Image
 
 from utils import Timer, pretty_print
-from searchMethod import fftSearch, spaceSearch, fftpSearch
+from searchMethod import fftSearch, spaceSearch, fftpSearch, cv2Search
 from data.dataset import Dataset
+
+
+def _trans_img(img):
+    img = img.astype(np.float32)
+    img = img / 255
+    return img
 
 
 class SearchMethodNotFoundException(Exception):
@@ -30,6 +37,8 @@ class SearchMethodNotFoundException(Exception):
 def main_search(imgL_file, imgS_file, search_method, rate=1):
     imgL = cv2.imread(str(imgL_file))
     imgS = cv2.imread(str(imgS_file))
+    imgL = _trans_img(imgL)
+    imgS = _trans_img(imgS)
 
     if search_method == 'space':
         search_method = functools.partial(spaceSearch.spaceSearch, stride=rate)
@@ -37,15 +46,18 @@ def main_search(imgL_file, imgS_file, search_method, rate=1):
         search_method = functools.partial(fftSearch.fftSearch, rate=rate)
     elif search_method == 'fftp':
         search_method = functools.partial(fftpSearch.fftpSearch, rate=rate)
+    elif search_method == 'cv2':
+        search_method = cv2Search.cv2Search
     else:
-        raise SearchMethodNotFoundException(search_method)
+        raise SearchMethodNotFoundException
 
-    box = search_method(imgL, imgS)
+    box, rate = search_method(imgL, imgS)
 
     result = {
         'imgL_file': imgL_file,
         'imgS_file': imgS_file,
         'box': box,
+        'param': rate,
     }
     return result
 
@@ -78,9 +90,9 @@ def metric(res_box, gt_box):
 
 def get_metric(timer, dists, t):
     metrics = {
-        'acc': np.mean(dists < t),
-        'average dist': f'{np.mean(dists):.2f}',
-        'average time': f'{timer.average_time() * 100: .2f}'
+        'acc(20)': np.mean(dists < t),
+        'average dist(pixel)': f'{np.mean(dists):.2f}',
+        'average time(ms)': f'{timer.average_time() * 1000: .2f}'
     }
     return metrics
 
@@ -91,8 +103,8 @@ if __name__ == '__main__':
     parser.add_argument('--dataset-dir', type=str, default='./data/face',
                         help='数据的路径，必须有imgL文件夹，imgS文件夹，和label.json标签文件')
     parser.add_argument('--result-path', type=str, default='./result', help='存放结果的文件夹')
-    parser.add_argument('--search-method', type=str, default='fft', help='搜索方法')
-    parser.add_argument('--rate', type=int, default=2, help='搜索方法的参数')
+    parser.add_argument('--search-method', type=str, default='cv2', help='搜索方法')
+    parser.add_argument('--rate', type=int, default=20, help='搜索方法的参数')
     parser.add_argument('--save', action='store_true', default=True, help='保存结果图片')
     parser.add_argument('--show', action='store_true', default=False, help='是否显示结果图片')
     parser.add_argument('--enable-log', action='store_true', default=False, help='是否显示log')
@@ -111,7 +123,7 @@ if __name__ == '__main__':
 
     timer = Timer()
 
-    N = 100
+    N = 500
     datas = dataset[:N]
     datas = tqdm(datas, total=N)
     dists = []
@@ -123,6 +135,7 @@ if __name__ == '__main__':
 
         with timer:
             res = main_search(imgL_path, imgS_path, search_method, rate)
+
         res = edict(res)
         # save_res(res, save_path)
         dist = metric(res.box, data.box)
@@ -136,6 +149,7 @@ if __name__ == '__main__':
             save_img_path = Path('result') / dataset_name / search_method / data.imgS_name
             save_img_path.parent.mkdir(exist_ok=True, parents=True)
             save_img(str(save_img_path), data.imgL, res_box=res.box, gt_box=data.box)
+        # print(res, dist)
 
     dists = np.array(dists)
     t = opt.rate
