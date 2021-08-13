@@ -5,13 +5,15 @@
 import datetime as dt
 from dataclasses import dataclass
 import json
+from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates as md
+
+from utils import json2dict
 
 
-def plot_candle(data_x, data_y, title, x_label, y_label):
+def candle(data_x, data_y, title, x_label, y_label, save_path=None):
     data_x = np.array(data_x)
     data_y = np.array(data_y)
 
@@ -44,13 +46,38 @@ def plot_candle(data_x, data_y, title, x_label, y_label):
     plt.plot(data_x, mean_data)
     # plt.legend()
     plt.gcf().autofmt_xdate()
+
+    if save_path:
+        plt.savefig(save_path)
+
     plt.show()
 
 
-if __name__ == '__main__':
-    data_file = 'result/error_main/face/mae.json'
+def plot_candle():
+    data_file = 'result/main/face/mae.json'
+    img_save_path = Path(data_file).parent.joinpath('pic.png').__str__()
     data = json.load(open(data_file, encoding='utf-8'))
     data_x = data['qualities']
     data_y = data['maes']
-    plot_candle(data_x, data_y, title='Error Compress K Line',
-                x_label='quality', y_label='mae')
+    candle(data_x, data_y, title='Error Compress K Line',
+           x_label='quality', y_label='mae', save_path=img_save_path)
+
+
+def plot_at():
+    data_file = 'result/cv2_res/metrics.json'
+    data = json2dict(data_file)
+    mm = np.zeros((len(data), 2))
+    for i, v in enumerate(data):
+        acc = v['acc(20)']
+        time = v['average time(ms)']
+        mm[i, 0] = acc
+        mm[i, 1] = time
+    plt.xlabel('time')
+    plt.ylabel('acc')
+    plt.scatter(mm[:, 1], mm[:, 0])
+    plt.show()
+    plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
+
+
+if __name__ == '__main__':
+    plot_at()

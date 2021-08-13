@@ -1,18 +1,19 @@
 import sys
-from typing import List
 
 sys.path.append('../')
-
+from typing import List
 import json
 from pathlib import Path
 
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
+import matplotlib.pyplot as plt
+import numpy as np
+from easydict import EasyDict as edict
+from tqdm import tqdm
 
 from data.dataset import Dataset
-from imageSearch import save_img
+from utils import Timer, save2json
 
 __all__ = ['cv2Search']
 
@@ -40,7 +41,8 @@ def _trans_img(img, rate):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     if rate != 1:
         h, w = img.shape[:2]
-        img = cv2.resize(img, (int(w // rate), int(h // rate)), cv2.INTER_LINEAR)
+        img = cv2.resize(
+            img, (int(w // rate), int(h // rate)), cv2.INTER_LINEAR)
         # show_img(img)
     return img
 
@@ -94,15 +96,38 @@ def cv2Search(imgL, imgS, b_rate=True, K=20, mae_threshold=0.05, method=cv2.TM_S
     mae_ = box_mae(imgL, imgS, box)
     conf = 1 - mae_ / mae_threshold
     conf = bound(conf, 0, 1)
-    return box, conf
+    res = {
+        'box': box,
+        'conf': conf,
+    }
+    res = edict(res)
+    return res
 
 
 if __name__ == '__main__':
+    from imageSearch import save_img, get_metric, box_dist
+
     data_dir = '../data/face'
     dataset = Dataset.from_dir(data_dir)
-    data = dataset.randOne()
-    imgL = data.imgL
-    imgS = data.imgS
-    gt_box = data.box
-    res_box = cv2Search(imgL, imgS)
-    save_img(f'1.jpg', imgL, res_box, gt_box)
+    N = 100
+    Ks = [i for i in range(10, 100)]
+    some_data = dataset[:N]  # 迭代器只能使用一次
+
+    metric_res = []
+    Ks_ = tqdm(Ks)
+    for K in Ks_:
+        timer = Timer()
+        dists = []
+        for data in some_data:
+            with timer:
+                res = cv2Search(data.imgL, data.imgS, K=K)
+                dist = box_dist(data.box, res.box)
+                dists.append(dist)
+        metric = get_metric(timer, dists)
+        metric['k'] = K
+        metric_res.append(metric)
+
+    save_path = Path('') / '..' / 'result' / 'cv2_res' / 'metrics.json'
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    save2json(metric_res, save_path)

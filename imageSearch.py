@@ -70,25 +70,31 @@ def save_res(res, save_path):
 
 def save_img(img_path, imgL, res_box, gt_box):
     im = cv2.cvtColor(imgL, cv2.COLOR_RGB2BGR)
-    im = cv2.rectangle(im, res_box[:2], res_box[2:], color=(0, 0, 255), thickness=2)
-    im = cv2.rectangle(im, gt_box[:2], gt_box[2:], color=(0, 255, 0), thickness=2)
+    im = cv2.rectangle(im, res_box[:2], res_box[2:],
+                       color=(0, 0, 255), thickness=2)
+    im = cv2.rectangle(im, gt_box[:2], gt_box[2:],
+                       color=(0, 255, 0), thickness=2)
     cv2.imwrite(img_path, im)
 
 
 def show_res(imgL, res_box, gt_box):
     im = cv2.cvtColor(imgL, cv2.COLOR_RGB2BGR)
-    im = cv2.rectangle(im, res_box[:2], res_box[2:], color=(0, 0, 255), thickness=2)
-    im = cv2.rectangle(im, gt_box[:2], gt_box[2:], color=(0, 255, 0), thickness=2)
+    im = cv2.rectangle(im, res_box[:2], res_box[2:],
+                       color=(0, 0, 255), thickness=2)
+    im = cv2.rectangle(im, gt_box[:2], gt_box[2:],
+                       color=(0, 255, 0), thickness=2)
     cv2.imshow('show', im)
     cv2.waitKey(0)
 
 
-def metric(res_box, gt_box):
-    dist = np.sqrt(np.power(res_box[0] - gt_box[0], 2) + np.power(res_box[1] - gt_box[1], 2))
+def box_dist(res_box, gt_box):
+    dist = np.sqrt(
+        np.power(res_box[0] - gt_box[0], 2) + np.power(res_box[1] - gt_box[1], 2))
     return dist
 
 
-def get_metric(timer, dists, t):
+def get_metric(timer, dists, t=20):
+    dists = np.array(dists)
     metrics = {
         'acc(20)': np.mean(dists < t),
         'average dist(pixel)': f'{np.mean(dists):.2f}',
@@ -102,12 +108,17 @@ if __name__ == '__main__':
 
     parser.add_argument('--dataset-dir', type=str, default='./data/face',
                         help='数据的路径，必须有imgL文件夹，imgS文件夹，和label.json标签文件')
-    parser.add_argument('--result-path', type=str, default='./result', help='存放结果的文件夹')
-    parser.add_argument('--search-method', type=str, default='cv2', help='搜索方法')
+    parser.add_argument('--result-path', type=str,
+                        default='./result', help='存放结果的文件夹')
+    parser.add_argument('--search-method', type=str,
+                        default='cv2', help='搜索方法')
     parser.add_argument('--rate', type=int, default=20, help='搜索方法的参数')
-    parser.add_argument('--save', action='store_true', default=True, help='保存结果图片')
-    parser.add_argument('--show', action='store_true', default=False, help='是否显示结果图片')
-    parser.add_argument('--enable-log', action='store_true', default=False, help='是否显示log')
+    parser.add_argument('--save', action='store_true',
+                        default=True, help='保存结果图片')
+    parser.add_argument('--show', action='store_true',
+                        default=False, help='是否显示结果图片')
+    parser.add_argument('--enable-log', action='store_true',
+                        default=False, help='是否显示log')
 
     opt = parser.parse_args()
 
@@ -138,17 +149,20 @@ if __name__ == '__main__':
 
         res = edict(res)
         # save_res(res, save_path)
-        dist = metric(res.box, data.box)
+        dist = box_dist(res.box, data.box)
         dists.append(dist)
+
         if opt.enable_log:
             print(f'run time: {timer.this_time() * 1000:.0f}ms.')
             print(f'dist: {dist:.2f}')
         if opt.show:
             show_res(data.imgL, res_box=res.box, gt_box=data.box)
         if opt.save:
-            save_img_path = Path('result') / dataset_name / search_method / data.imgS_name
+            save_img_path = Path('result') / dataset_name / \
+                            search_method / data.imgS_name
             save_img_path.parent.mkdir(exist_ok=True, parents=True)
-            save_img(str(save_img_path), data.imgL, res_box=res.box, gt_box=data.box)
+            save_img(str(save_img_path), data.imgL,
+                     res_box=res.box, gt_box=data.box)
         # print(res, dist)
 
     dists = np.array(dists)

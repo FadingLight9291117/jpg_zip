@@ -71,3 +71,14 @@ class Timer:
 
 def mae(img1, img2):
     return np.mean(np.abs(img1 - img2))
+
+
+def save2json(data, path):
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
+
+
+def json2dict(json_path):
+    with open(json_path, encoding='utf-8') as f:
+        d = json.load(f)
+    return d
