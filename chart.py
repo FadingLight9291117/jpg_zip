@@ -74,7 +74,7 @@ def plot_at():
         mm[i, 1] = time
     plt.xlabel('time')
     plt.ylabel('acc')
-    plt.scatter(mm[:, 1], mm[:, 0])
+    plt.plot(mm[:, 1], mm[:, 0])
     plt.show()
     plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
 
