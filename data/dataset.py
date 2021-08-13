@@ -19,17 +19,19 @@ class Dataset:
         imgS: np.ndarray
         box: np.ndarray
 
+    @classmethod
+    def from_dir(cls, data_dir):
+        data_dir = Path(data_dir)
+        imgL_dir = data_dir / 'imgL'
+        imgS_dir = data_dir / 'imgS'
+        label_path = data_dir / 'label.json'
+        return cls(imgL_dir, imgS_dir, label_path)
+
     def __init__(self, imgL_dir, imgS_dir, label_path):
         self.imgL_path = imgL_dir
         self.imgS_path = imgS_dir
         with open(label_path, encoding='utf-8') as f:
             self.labels = json.load(f)
-
-    def from_dir(self, data_dir):
-        data_dir = Path(data_dir)
-        imgL_dir = data_dir / 'imgL'
-        imgS_dir = data_dir / 'imgS'
-        label_path = data_dir / 'label_path'
 
     def _trans_img(self, img: np.ndarray):
         # img = img.astype(np.float)
@@ -45,7 +47,7 @@ class Dataset:
         for i in range(num):
             yield self.randOne()
 
-    def label2Data(self, label):
+    def _label2Data(self, label):
         imgL_name = label['imgL']
         imgS_name = label['imgS']
         imgL_path = Path(self.imgL_path) / imgL_name
@@ -61,9 +63,9 @@ class Dataset:
     def __getitem__(self, i):
         label = self.labels[i]
         if type(label) is list:
-            return [self.label2Data(l) for l in label]
+            return [self._label2Data(l) for l in label]
         else:
-            return self.label2Data(label)
+            return self._label2Data(label)
 
     def __len__(self):
         return len(self.labels)

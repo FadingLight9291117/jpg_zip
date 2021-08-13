@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from easydict import EasyDict as edict
 import matplotlib.pyplot as plt
-import mpl_finance
+from tqdm import tqdm
 
 from utils import pretty_print, number_formatter, Number
 from data.dataset import Dataset
@@ -22,8 +22,10 @@ from data.dataset import Dataset
 def get_opt():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--data-dir', type=str, default='data/face', help='原始图片文件夹路径。')
-    parser.add_argument('--chart-path', type=str, default='charts', help='存放保存的图表')
+    parser.add_argument('--data-dir', type=str,
+                        default='data/face', help='原始图片文件夹路径。')
+    parser.add_argument('--chart-path', type=str,
+                        default='charts', help='存放保存的图表')
     # parser.add_argument('--result-path', type=str, default='result/')
 
     return parser.parse_args()
@@ -70,7 +72,7 @@ def get_metrics(img, o_img):
     o_img = trans_img(o_img)
     img_sub = img - o_img
     mae = np.mean(np.abs(img_sub))
-
+    mae = float(mae)
     metrics = {
         'mae': mae,
     }
@@ -87,35 +89,22 @@ def get_imgs(paths):
     return list(map(transform_img, imgs))
 
 
-def plot_img(, save_path, show=False):
-    fig, ax = plt.subplots(figsize=(10, 5))
-    mpl_finance.candlestick_ochl(
-        ax=ax,
-
-    )
-
-
-qualitys = [i * 10 for i in range(1, 11)]
-
-
 def main():
-    qualitys = [i * 10 for i in range(1, 11)]
-    opt = get_opt()
-    data_dir = Path(opt.data_dir)
-    label_path = data_dir / 'label.json'
-    imgL_path = data_dir / 'imgL'
-    imgS_path = data_dir / 'imgS'
-
-    dataset = Dataset(imgL_path, imgS_path, label_path)
-
-    labels = json.load(label_path.open())
-
-    maes = []
     epochs = 100
-    for quality in qualitys:
+    qualities = [i * 10 for i in range(1, 11)]
+    opt = get_opt()
+    data_dir = opt.data_dir
+
+    save_path = Path('result') / 'main' / Path(data_dir).name
+    save_path.mkdir(parents=True, exist_ok=True)
+
+    dataset = Dataset.from_dir(data_dir)
+    qualities_ = tqdm(qualities)
+    maes = []
+    for quality in qualities_:
         maes_ = []
-        for i in range(epochs):
-            rand_idx = np.random.randint(len(labels))
+        for _ in range(epochs):
+            rand_idx = np.random.randint(len(dataset))
             data = dataset[rand_idx]
             imgS = data.imgS
             imgS_compressed = img_compose_cv2(imgS, quality)
@@ -123,27 +112,35 @@ def main():
             mae = get_metrics(imgS, imgS_compressed).mae
             maes_.append(mae)
         maes.append(maes_)
-
-    return maes
+    res = {
+        'qualities': qualities,
+        'maes': maes,
+    }
+    mae_save_path = save_path / 'mae.json'
+    with mae_save_path.open('w', encoding='utf-8') as f:
+        json.dump(res, f)
+    print(f'save in {str(mae_save_path)}.')
+    return res
 
 
 def error_main():
+    epochs = 100
+    qualities = [i * 10 for i in range(1, 11)]
     opt = get_opt()
     data_dir = Path(opt.data_dir)
-    label_path = data_dir / 'label.json'
-    imgL_path = data_dir / 'imgL'
-    imgS_path = data_dir / 'imgS'
 
-    dataset = Dataset(imgL_path, imgS_path, label_path)
+    save_path = Path('result') / 'error_main' / Path(data_dir).name
+    save_path.mkdir(parents=True, exist_ok=True)
 
-    labels = json.load(label_path.open())
+    dataset = Dataset.from_dir(data_dir.__str__())
 
     maes = []
     epochs = 100
-    for quality in qualitys:
+    qualities_ = tqdm(qualities)
+    for quality in qualities_:
         maes_ = []
         for i in range(epochs):
-            rand_idx = np.random.randint(len(labels))
+            rand_idx = np.random.randint(len(dataset))
             data = dataset[rand_idx]
             imgS = data.imgS
             crop = rand_crop(data.imgL, imgS.shape[:2])
@@ -152,7 +149,15 @@ def error_main():
             mae = get_metrics(crop, imgS_compressed).mae
             maes_.append(mae)
         maes.append(maes_)
-    ...
+    res = {
+        'qualities': qualities,
+        'maes': maes,
+    }
+    mae_save_path = save_path / 'mae.json'
+    with mae_save_path.open('w', encoding='utf-8') as f:
+        json.dump(res, f)
+    print(f'save in {str(mae_save_path)}.')
+    return res
 
 
 def rand_crop(img: np.ndarray, shape):

@@ -2,63 +2,55 @@
     绘制蜡烛图
 """
 
-import numpy as np
 import datetime as dt
-import matplotlib.pyplot as mp
+from dataclasses import dataclass
+import json
+
+import numpy as np
+import matplotlib.pyplot as plt
 import matplotlib.dates as md
 
 
-def plot_candle(data):
-    dates = [i + 1 for i in range(10)]
-    min_mae = [1] * 10
-    max_mae = [2, 3, 4, 5, 6, 7, 10, 2, 6, 1]
+def plot_candle(data_x, data_y, title, x_label, y_label):
+    data_x = np.array(data_x)
+    data_y = np.array(data_y)
 
-    k = 2.5
-    mean_mae = [1.5] * 10
-    std_mae = [0.5] * 10
-    max_mae2 = np.array([i + j * k for i, j in zip(mean_mae, std_mae)])
-    min_mae2 = np.array([i + j * k for i, j in zip(mean_mae, std_mae)])
+    max_data = data_y.max(axis=1)
+    min_data = data_y.min(axis=1)
+
+    mean_data = data_y.mean(axis=1)
+    std_data = data_y.std(axis=1)
 
     # 2.设置绘图窗口
-    mp.figure("Apple K Line", facecolor="lightgray")
-    mp.title("Apple K Line", fontsize=16)
-    mp.xlabel("Data", fontsize=14)
-    mp.ylabel("Price", fontsize=14)
+    plt.figure(title, facecolor="lightgray")
+    plt.title(title, fontsize=16)
+    plt.xlabel(x_label, fontsize=14)
+    plt.ylabel(y_label, fontsize=14)
 
     # 3.x坐标（时间轴）轴修改
-    ax = mp.gca()
-    # 设置主刻度定位器为周定位器（每周一显示主刻度文本）
-    # ax.xaxis.set_major_locator(md.WeekdayLocator(byweekday=md.MO))
-    # ax.xaxis.set_major_formatter(md.DateFormatter('%Y-%m-%d'))
-    # ax.xaxis.set_minor_locator(md.DayLocator())
+    ax = plt.gca()
 
-    mp.tick_params(labelsize=8)
-    mp.grid(linestyle=":")
+    plt.tick_params(labelsize=8)
+    plt.grid(linestyle=":")
 
-    # 4.判断收盘价与开盘价 确定蜡烛颜色
-    colors_bool = max_mae2 >= min_mae2
-    colors = np.zeros(colors_bool.size, dtype="U5")
-    colors[:] = "blue"
-    colors[colors_bool] = "white"
-
-    # 5.确定蜡烛边框颜色
-    edge_colors = np.zeros(colors_bool.size, dtype="U1")
-    edge_colors[:] = "b"
-    edge_colors[colors_bool] = "r"
-    #
-    # # 绘制开盘价折线图片
-    # dates = dates.astype(md.datetime.datetime)
-    # mp.plot(dates, open_price, color="b", linestyle="--",
-    #         linewidth=2, label="open", alpha=0.3)
-    #
     # # 6.绘制蜡烛
-    mp.bar(dates, (max_mae2), 0.8, bottom=min_mae2, color=colors,
-           edgecolor=edge_colors, zorder=3)
+    plt.bar(data_x, std_data, 1, bottom=mean_data - std_data / 2, color='red',
+            edgecolor='black', zorder=3)
 
     # 7.绘制蜡烛直线(最高价与最低价)
-    # mp.vlines(dates, min_price, max_price, color=edge_colors)
+    plt.vlines(data_x, min_data, max_data)
 
-    mp.vlines(dates, min_mae, max_mae)
-    mp.legend()
-    mp.gcf().autofmt_xdate()
-    mp.show()
+    # 8. 绘制均值曲线
+    plt.plot(data_x, mean_data)
+    # plt.legend()
+    plt.gcf().autofmt_xdate()
+    plt.show()
+
+
+if __name__ == '__main__':
+    data_file = 'result/error_main/face/mae.json'
+    data = json.load(open(data_file, encoding='utf-8'))
+    data_x = data['qualities']
+    data_y = data['maes']
+    plot_candle(data_x, data_y, title='Error Compress K Line',
+                x_label='quality', y_label='mae')
