@@ -66,15 +66,17 @@ def plot_candle():
 def plot_at():
     data_file = 'result/cv2_res/metrics.json'
     data = json2dict(data_file)
-    mm = np.zeros((len(data), 2))
+    mm = np.zeros((len(data), 3))
     for i, v in enumerate(data):
         acc = v['acc(20)']
         time = v['average time(ms)']
+        k = v['k']
         mm[i, 0] = acc
         mm[i, 1] = time
+        mm[i, 2] = k
     plt.xlabel('time')
     plt.ylabel('acc')
-    plt.plot(mm[:, 1], mm[:, 0])
+    plt.plot(mm[:, 1], mm[:, 0], mm[:, 3], label='K 曲线')
     # plt.show()
     plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
 

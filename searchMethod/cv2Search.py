@@ -4,6 +4,7 @@ sys.path.append('../')
 from typing import List
 import json
 from pathlib import Path
+import itertools
 
 import cv2
 from PIL import Image
@@ -107,11 +108,18 @@ def cv2Search(imgL, imgS, b_rate=True, K=20, mae_threshold=0.05, method=cv2.TM_S
 if __name__ == '__main__':
     from imageSearch import save_img, get_metric, box_dist
 
-    data_dir = '../data/face'
-    dataset = Dataset.from_dir(data_dir)
-    N = 100
-    Ks = [i for i in range(10, 100)]
-    some_data = dataset[:N]  # 迭代器只能使用一次
+    data_dir1 = '../data/face'
+    data_dir2 = '../data/celeface'
+
+    dataset1 = Dataset.from_dir(data_dir1)
+    # dataset2 = Dataset.from_dir(data_dir2)
+    # dataset = dataset1[:] +  dataset2[:]
+    dataset = dataset1
+
+    print(f'dataset size: {len(dataset)}')
+
+    Ks = [i for i in range(1, 500)]
+    some_data = dataset[:]  # 迭代器只能使用一次
 
     metric_res = []
     Ks_ = tqdm(Ks)
@@ -127,7 +135,7 @@ if __name__ == '__main__':
         metric['k'] = K
         metric_res.append(metric)
 
-    save_path = Path('') / '..' / 'result' / 'cv2_res' / 'metrics.json'
+    save_path = Path('') / '..' / 'result' / 'cv2_res' / 'face' /'metrics.json'
     save_path.parent.mkdir(parents=True, exist_ok=True)
 
     save2json(metric_res, save_path)
