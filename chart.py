@@ -74,9 +74,12 @@ def plot_at():
         mm[i, 0] = acc
         mm[i, 1] = time
         mm[i, 2] = k
-    plt.xlabel('time')
-    plt.ylabel('acc')
-    plt.plot(mm[:, 1], mm[:, 0], mm[:, 3], label='K 曲线')
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.set_ylabel('time')
+    ax.set_zlabel('acc')
+    ax.set_xlabel('k')
+    plt.plot(mm[:, 2], mm[:, 1], mm[:, 0], label='K 曲线')
     # plt.show()
     plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
 
