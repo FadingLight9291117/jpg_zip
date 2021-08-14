@@ -79,9 +79,9 @@ def plot_3dat():
     ax.set_ylabel('time')
     ax.set_zlabel('acc')
     ax.set_xlabel('k')
-    plt.plot( mm[:, 1], mm[:, 0], label='K 曲线')
-    # plt.show()
-    plt.savefig(Path(data_file).parent.joinpath('metrics_3d.png').__str__())
+    plt.plot(mm[:, 2], mm[:, 1], mm[:, 0], label='K 曲线')
+    plt.show()
+    # plt.savefig(Path(data_file).parent.joinpath('metrics_3d.png').__str__())
 
 def plot_at():
     data_file = 'result/cv2_res/face/metrics.json'
@@ -97,8 +97,8 @@ def plot_at():
     plt.xlabel('time(ms)')
     plt.ylabel('acc(20)')
     plt.plot( mm[:, 1], mm[:, 0], label='K 曲线')
-    # plt.show()
-    plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
+    plt.show()
+    # plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
 
 if __name__ == '__main__':
-    plot_at()
+    plot_3dat()

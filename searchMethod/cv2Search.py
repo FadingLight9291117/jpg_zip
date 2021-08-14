@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     print(f'dataset size: {len(dataset)}')
 
-    Ks = [i for i in range(1, 500)]
+    Ks = [i for i in range(1, 100)]
     some_data = dataset[:]  # 迭代器只能使用一次
 
     metric_res = []
