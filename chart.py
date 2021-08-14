@@ -63,8 +63,8 @@ def plot_candle():
            x_label='quality', y_label='mae', save_path=img_save_path)
 
 
-def plot_at():
-    data_file = 'result/cv2_res/metrics.json'
+def plot_3dat():
+    data_file = 'result/cv2_res/face/metrics.json'
     data = json2dict(data_file)
     mm = np.zeros((len(data), 3))
     for i, v in enumerate(data):
@@ -79,10 +79,26 @@ def plot_at():
     ax.set_ylabel('time')
     ax.set_zlabel('acc')
     ax.set_xlabel('k')
-    plt.plot(mm[:, 2], mm[:, 1], mm[:, 0], label='K 曲线')
+    plt.plot( mm[:, 1], mm[:, 0], label='K 曲线')
+    # plt.show()
+    plt.savefig(Path(data_file).parent.joinpath('metrics_3d.png').__str__())
+
+def plot_at():
+    data_file = 'result/cv2_res/face/metrics.json'
+    data = json2dict(data_file)
+    mm = np.zeros((len(data), 3))
+    for i, v in enumerate(data):
+        acc = v['acc(20)']
+        time = v['average time(ms)']
+        k = v['k']
+        mm[i, 0] = acc
+        mm[i, 1] = time
+        mm[i, 2] = k
+    plt.xlabel('time(ms)')
+    plt.ylabel('acc(20)')
+    plt.plot( mm[:, 1], mm[:, 0], label='K 曲线')
     # plt.show()
     plt.savefig(Path(data_file).parent.joinpath('metrics.png').__str__())
-
 
 if __name__ == '__main__':
     plot_at()

@@ -1,0 +1,542 @@
+[
+    {
+        "acc(20)": 0.97,
+        "average dist(pixel)": "26.31",
+        "average time(ms)": " 2.09",
+        "k": 10
+    },
+    {
+        "acc(20)": 0.978,
+        "average dist(pixel)": "17.04",
+        "average time(ms)": " 2.39",
+        "k": 11
+    },
+    {
+        "acc(20)": 0.984,
+        "average dist(pixel)": "11.29",
+        "average time(ms)": " 2.73",
+        "k": 12
+    },
+    {
+        "acc(20)": 0.994,
+        "average dist(pixel)": "7.41",
+        "average time(ms)": " 2.99",
+        "k": 13
+    },
+    {
+        "acc(20)": 0.992,
+        "average dist(pixel)": "5.90",
+        "average time(ms)": " 3.47",
+        "k": 14
+    },
+    {
+        "acc(20)": 0.992,
+        "average dist(pixel)": "8.10",
+        "average time(ms)": " 3.61",
+        "k": 15
+    },
+    {
+        "acc(20)": 0.994,
+        "average dist(pixel)": "8.26",
+        "average time(ms)": " 4.21",
+        "k": 16
+    },
+    {
+        "acc(20)": 0.996,
+        "average dist(pixel)": "6.03",
+        "average time(ms)": " 4.22",
+        "k": 17
+    },
+    {
+        "acc(20)": 0.994,
+        "average dist(pixel)": "5.11",
+        "average time(ms)": " 4.55",
+        "k": 18
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "2.32",
+        "average time(ms)": " 4.90",
+        "k": 19
+    },
+    {
+        "acc(20)": 0.998,
+        "average dist(pixel)": "2.12",
+        "average time(ms)": " 5.26",
+        "k": 20
+    },
+    {
+        "acc(20)": 0.998,
+        "average dist(pixel)": "4.65",
+        "average time(ms)": " 5.67",
+        "k": 21
+    },
+    {
+        "acc(20)": 0.998,
+        "average dist(pixel)": "4.66",
+        "average time(ms)": " 5.86",
+        "k": 22
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.79",
+        "average time(ms)": " 6.29",
+        "k": 23
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.77",
+        "average time(ms)": " 6.71",
+        "k": 24
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.69",
+        "average time(ms)": " 7.08",
+        "k": 25
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.68",
+        "average time(ms)": " 7.60",
+        "k": 26
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.57",
+        "average time(ms)": " 8.00",
+        "k": 27
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.57",
+        "average time(ms)": " 8.33",
+        "k": 28
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.51",
+        "average time(ms)": " 8.89",
+        "k": 29
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.42",
+        "average time(ms)": " 9.55",
+        "k": 30
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.35",
+        "average time(ms)": " 10.00",
+        "k": 31
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.48",
+        "average time(ms)": " 10.40",
+        "k": 32
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.31",
+        "average time(ms)": " 11.04",
+        "k": 33
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.23",
+        "average time(ms)": " 11.39",
+        "k": 34
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.24",
+        "average time(ms)": " 11.98",
+        "k": 35
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.22",
+        "average time(ms)": " 12.55",
+        "k": 36
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.20",
+        "average time(ms)": " 13.08",
+        "k": 37
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.17",
+        "average time(ms)": " 13.57",
+        "k": 38
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.20",
+        "average time(ms)": " 14.18",
+        "k": 39
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.09",
+        "average time(ms)": " 14.49",
+        "k": 40
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.05",
+        "average time(ms)": " 14.97",
+        "k": 41
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.02",
+        "average time(ms)": " 15.41",
+        "k": 42
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "1.02",
+        "average time(ms)": " 16.09",
+        "k": 43
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.95",
+        "average time(ms)": " 16.46",
+        "k": 44
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.98",
+        "average time(ms)": " 16.92",
+        "k": 45
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.94",
+        "average time(ms)": " 17.53",
+        "k": 46
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.96",
+        "average time(ms)": " 18.03",
+        "k": 47
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.88",
+        "average time(ms)": " 18.61",
+        "k": 48
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.86",
+        "average time(ms)": " 19.05",
+        "k": 49
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.90",
+        "average time(ms)": " 19.74",
+        "k": 50
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.82",
+        "average time(ms)": " 20.27",
+        "k": 51
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.89",
+        "average time(ms)": " 20.79",
+        "k": 52
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.89",
+        "average time(ms)": " 21.39",
+        "k": 53
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.77",
+        "average time(ms)": " 21.94",
+        "k": 54
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.76",
+        "average time(ms)": " 22.45",
+        "k": 55
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.76",
+        "average time(ms)": " 22.99",
+        "k": 56
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.72",
+        "average time(ms)": " 23.65",
+        "k": 57
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.74",
+        "average time(ms)": " 24.18",
+        "k": 58
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.70",
+        "average time(ms)": " 24.56",
+        "k": 59
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.66",
+        "average time(ms)": " 25.04",
+        "k": 60
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.67",
+        "average time(ms)": " 25.51",
+        "k": 61
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.65",
+        "average time(ms)": " 25.90",
+        "k": 62
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.64",
+        "average time(ms)": " 26.41",
+        "k": 63
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.70",
+        "average time(ms)": " 27.05",
+        "k": 64
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.64",
+        "average time(ms)": " 27.18",
+        "k": 65
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.62",
+        "average time(ms)": " 27.28",
+        "k": 66
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.58",
+        "average time(ms)": " 27.66",
+        "k": 67
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.51",
+        "average time(ms)": " 28.02",
+        "k": 68
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.51",
+        "average time(ms)": " 28.43",
+        "k": 69
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.58",
+        "average time(ms)": " 28.82",
+        "k": 70
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.51",
+        "average time(ms)": " 29.18",
+        "k": 71
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.50",
+        "average time(ms)": " 29.59",
+        "k": 72
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.49",
+        "average time(ms)": " 29.88",
+        "k": 73
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.45",
+        "average time(ms)": " 30.11",
+        "k": 74
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.45",
+        "average time(ms)": " 30.38",
+        "k": 75
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.44",
+        "average time(ms)": " 30.74",
+        "k": 76
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.43",
+        "average time(ms)": " 30.93",
+        "k": 77
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.45",
+        "average time(ms)": " 31.38",
+        "k": 78
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.42",
+        "average time(ms)": " 31.81",
+        "k": 79
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.39",
+        "average time(ms)": " 31.85",
+        "k": 80
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.40",
+        "average time(ms)": " 32.15",
+        "k": 81
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.39",
+        "average time(ms)": " 32.38",
+        "k": 82
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.38",
+        "average time(ms)": " 32.68",
+        "k": 83
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.36",
+        "average time(ms)": " 33.00",
+        "k": 84
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.35",
+        "average time(ms)": " 33.35",
+        "k": 85
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.34",
+        "average time(ms)": " 33.71",
+        "k": 86
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.33",
+        "average time(ms)": " 33.90",
+        "k": 87
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.34",
+        "average time(ms)": " 33.97",
+        "k": 88
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.31",
+        "average time(ms)": " 34.20",
+        "k": 89
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.30",
+        "average time(ms)": " 34.37",
+        "k": 90
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.31",
+        "average time(ms)": " 34.24",
+        "k": 91
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.27",
+        "average time(ms)": " 34.28",
+        "k": 92
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.25",
+        "average time(ms)": " 34.42",
+        "k": 93
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.26",
+        "average time(ms)": " 34.66",
+        "k": 94
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.27",
+        "average time(ms)": " 34.85",
+        "k": 95
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.30",
+        "average time(ms)": " 35.00",
+        "k": 96
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.25",
+        "average time(ms)": " 35.21",
+        "k": 97
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.25",
+        "average time(ms)": " 35.44",
+        "k": 98
+    },
+    {
+        "acc(20)": 1.0,
+        "average dist(pixel)": "0.25",
+        "average time(ms)": " 35.38",
+        "k": 99
+    }
+]
